@@ -28,7 +28,8 @@ exports.handler = async (event) => {
                 },
                 body: JSON.stringify({
                     contents: [{ role: "user", parts: [{ text: prompt }] }],
-                    config: {
+                    // <mark>이전: config 였던 것을 generationConfig 로 변경</mark>
+                    generationConfig: {
                         temperature: 0.7
                     }
                 })
