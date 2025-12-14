@@ -1,0 +1,112 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    background-color: white;
+    color: white;
+}
+
+#wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#infinite-canvas {
+    position: absolute;
+    cursor: grab;
+    transition: transform 0.05s linear;
+}
+
+.cut-item {
+    position: absolute;
+    background-size: cover;
+    background-position: center;
+    border: 3px solid transparent;
+    cursor: pointer;
+    opacity: 0.6;
+    filter: grayscale(100%);
+    /* 기본 불투명도 */
+    transition: border 0.3s, opacity 0.3s, transform 0.3s;
+    box-sizing: border-box;
+
+
+    /* 컴퓨터 (기본) 크기 */
+    width: 400px;
+    height: 250px;
+}
+
+/* 선택 시 피드백: 불투명도 증가 및 빛나는 효과 */
+.cut-item.selected {
+    opacity: 1;
+    transform: scale(1.05);
+    filter: none;
+}
+
+/* 모바일 최적화 (600px 이하) */
+@media (max-width: 600px) {
+    .cut-item {
+        width: 250px;
+        height: 150px;
+    }
+}
+
+/* 라인 캔버스 설정 */
+#line-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 사용자 안내 메시지 */
+#instruction {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+}
+
+/* 스토리 패널 설정 */
+#story-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    padding: 30px;
+    border: 1px solid #00ffff;
+    max-width: 80vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 100;
+    text-align: center;
+}
+
+#story-panel.hidden {
+    display: none;
+}
+
+#story-output {
+    text-align: left;
+    white-space: pre-wrap;
+    margin-bottom: 20px;
+    border-left: 3px solid #00ffff;
+    padding-left: 10px;
+}
+
+#restart-button {
+    padding: 10px 20px;
+    background-color: #00ffff;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+}

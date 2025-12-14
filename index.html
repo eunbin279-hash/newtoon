@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="./src/style.css">
+    <title>만화</title>
+</head>
+
+<body>
+    <div id="wrapper">
+        <canvas id="line-canvas"></canvas>
+        <div id="infinite-canvas"></div>
+    </div>
+
+    <div id="instruction">당신의 시선에 따라 이미지를 선택하세요</div>
+
+    <div id="story-panel" class="hidden">
+        <h2>연결된 이야기</h2>
+        <div id="story-output"></div>
+        <button id="restart-button">다시 읽기</button>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
