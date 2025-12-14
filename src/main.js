@@ -5,7 +5,6 @@ const NUM_USER_CUTS = 10;
 const MIN_DISTANCE = 150; // 겹침 방지를 위한 최소 거리 (px)
 const COLLISION_MARGIN = 100; // 충돌 감지 마진
 const CUT_SIZE = { width: 400, height: 250 };
-const GEMINI_API_KEY = "AIzaSyAp77-vFQwY91zhOlJ3xuv4Slwr20i_bwM";
 const TEMP_DESCRIPTIONS = [
     "침대에 멍하니 누워 있다", "눈물이 흐른다", "쏴아아, 바다 소리가 들린다",
     "점점 물에 잠기고, 무언가가 톡 하고 건드린다", "눈을 뜨자 물 속이다", "몸을 일으키자 바다가 눈 앞에 있다",
@@ -241,8 +240,7 @@ function generateStory() {
 
 async function callGeminiAPI(prompt) {
     const GEMINI_MODEL = 'gemini-2.5-flash'; // 빠르고 효율적인 모델 선택
-    const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-
+    const API_ENDPOINT = '/.netlify/functions/generate';
     try {
         const response = await fetch(API_ENDPOINT, {
             method: 'POST',
@@ -250,21 +248,19 @@ async function callGeminiAPI(prompt) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                contents: [{ role: "user", parts: [{ text: prompt }] }],
-                config: {
-                    temperature: 0.7 // 창의성 정도 (0.0: 보수적 ~ 1.0: 창의적)
-                }
+                prompt: prompt
             })
         });
 
         if (!response.ok) {
-            throw new Error(`API 요청 실패: ${response.status} ${response.statusText}`);
+            const errorData = await response.json();
+            throw new Error(`서버리스 함수 오류: ${errorData.details}`);
         }
 
         const data = await response.json();
 
         // AI 응답에서 텍스트 결과 추출
-        const aiStory = data.candidates[0].content.parts[0].text;
+        const aiStory = data.story;
 
         // 결과 화면에 출력
         storyOutputDiv.textContent = aiStory;
