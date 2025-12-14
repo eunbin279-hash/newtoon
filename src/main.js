@@ -5,7 +5,7 @@ const NUM_USER_CUTS = 10;
 const MIN_DISTANCE = 150; // 겹침 방지를 위한 최소 거리 (px)
 const COLLISION_MARGIN = 100; // 충돌 감지 마진
 const CUT_SIZE = { width: 400, height: 250 };
-const AI_API_KEY = "AIzaSyAp77-vFQwY91zhOlJ3xuv4Slwr20i_bwM";
+const GEMINI_API_KEY = "AIzaSyAp77-vFQwY91zhOlJ3xuv4Slwr20i_bwM";
 const TEMP_DESCRIPTIONS = [
     "침대에 멍하니 누워 있다", "눈물이 흐른다", "쏴아아, 바다 소리가 들린다",
     "점점 물에 잠기고, 무언가가 톡 하고 건드린다", "눈을 뜨자 물 속이다", "몸을 일으키자 바다가 눈 앞에 있다",
