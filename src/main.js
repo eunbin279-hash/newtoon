@@ -124,10 +124,6 @@ function renderCuts() {
         descriptionEl.textContent = cut.description;
         el.appendChild(descriptionEl);
 
-        const sequenceNumberEl = document.createElement('div');
-        sequenceNumberEl.classList.add('sequence-number-overlay');
-        el.appendChild(sequenceNumberEl);
-
 
         // 클릭 이벤트 리스너 추가
         el.addEventListener('click', (e) => {
@@ -136,7 +132,7 @@ function renderCuts() {
             e.stopPropagation();
         });
         cut.element = el;
-        cut.sequenceElement = sequenceNumberEl; // 순서 번호 요소 저장
+
         canvas.appendChild(el);
     });
 }
@@ -168,29 +164,13 @@ function handleCutClick(cutData, el) {
         });
         el.classList.add('selected');
         if (selectedSequence.length === NUM_USER_CUTS) {
-            // ... (generateStory 로직) ...
+            // 선택이 완료되면 스토리 생성 실행
+            generateStory();
         }
     }
     updateSelectionDisplay();
     drawLines();
 }
-
-
-function updateSelectionDisplay() {
-    allCuts.forEach(cut => {
-        const index = selectedSequence.findIndex(item => item.id === cut.id);
-
-        if (index > -1) {
-            // 선택된 컷: 순서 번호 표시
-            // cut.sequenceElement가 1번 수정 후 정상적으로 작동합니다.
-            cut.sequenceElement.textContent = index + 1;
-        } else {
-            // 미선택된 컷: 순서 번호 숨김
-            cut.sequenceElement.textContent = '';
-        }
-    });
-}
-
 
 // 연결선 그리기 (기존 로직 유지)
 function drawLines() {
@@ -219,6 +199,22 @@ function drawLines() {
     lineCtx.closePath();
 }
 
+// --- 스토리 생성 함수 ---
+function generateStory() {
+    isStoryGenerated = true;
+
+    // 순서대로 정렬된 뒷설명 추출
+    const descriptions = selectedSequence.map(item => item.description);
+    const imageNumbers = selectedSequence.map(item => item.imageNumber);
+
+    // AI API에 전달할 프롬프트
+    const storyPrompt = `다음 설명들을 순서대로 연결하여 하나의 이어진 이야기를 창작해 주세요. 설명 순서: ${descriptions.join(' -> ')}`;
+    storyOutputDiv.innerHTML = `이야기를 생성 중입니다... 잠시만 기다려 주세요.`;
+    storyPanel.classList.remove('hidden');
+
+    callGeminiAPI(storyPrompt);
+}
+
 function updateSelectionDisplay() {
     allCuts.forEach(cut => {
         const index = selectedSequence.findIndex(item => item.id === cut.id);
@@ -230,7 +226,31 @@ function updateSelectionDisplay() {
     });
 }
 
-// ... (toggleLineAnimation, animateLines, generateStory, callGeminiAPI, restartButton 로직은 그대로 유지) ...
+function toggleLineAnimation(shouldAnimate) {
+
+    if (shouldAnimate && !isAnimatingLines) {
+        isAnimatingLines = true;
+        animateLines();
+
+    } else if (!shouldAnimate && isAnimatingLines) {
+        isAnimatingLines = false;
+        cancelAnimationFrame(animationFrameId);
+    }
+}
+
+// <mark>신규 함수: requestAnimationFrame을 사용하는 메인 애니메이션 루프</mark>
+function animateLines() {
+    if (!isDragging) {
+        // 드래그가 멈추면 애니메이션 루프 중지
+        toggleLineAnimation(false);
+        return;
+    }
+    drawLines(); // 선을 그리는 함수 호출
+    // 다음 프레임 요청
+    animationFrameId = requestAnimationFrame(animateLines);
+
+}
+
 
 
 // --- 캔버스 드래그 핸들러 (수정) ---
@@ -368,8 +388,49 @@ document.addEventListener('touchend', (e) => {
         document.body.style.cursor = 'grab';
         drawLines();
     }
-    // <mark>*** 수정 끝 ***</mark>
 });
 
 // 캔버스 초기화 실행
+// --- AI 호출: Gemini (서버리스 함수 경유) ---
+async function callGeminiAPI(prompt) {
+    const API_ENDPOINT = '/.netlify/functions/generate';
+
+    try {
+        const response = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+
+        if (!response.ok) {
+            // 가능한 에러 메시지 파싱
+            let errorText = await response.text();
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorText = errorJson.details || errorJson.message || errorText;
+            } catch (e) {
+                // 텍스트 그대로 사용
+            }
+            throw new Error(`서버리스 함수 오류: ${errorText}`);
+        }
+
+        const data = await response.json();
+
+        // AI 응답에서 텍스트 결과 추출 (유연하게 처리)
+        const aiStory = data.story || data.result || data.text || (typeof data === 'string' ? data : JSON.stringify(data));
+
+        storyOutputDiv.textContent = aiStory;
+    } catch (error) {
+        console.error('Gemini API 호출 중 오류 발생:', error);
+        storyOutputDiv.textContent = `오류 발생: ${error.message}\nAPI 키, 네트워크 연결, 또는 요청 형식에 문제가 없는지 확인해 주세요.`;
+    }
+}
+
+// 다시 읽기 버튼 이벤트
+if (restartButton) {
+    restartButton.addEventListener('click', () => {
+        window.location.reload();
+    });
+}
+
 window.onload = initializeCanvas;

@@ -148,6 +148,7 @@ html {
 }
 
 #restart-button {
+    font-family: 'MissedSimsim';
     padding: 10px 20px;
     background-color: #00ffff;
     border: none;
