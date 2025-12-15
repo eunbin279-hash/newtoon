@@ -2,13 +2,13 @@
 const CANVAS_WIDTH = 3000;
 const CANVAS_HEIGHT = 1500;
 const NUM_USER_CUTS = 10;
-const MIN_DISTANCE = 15;
-const COLLISION_MARGIN = 7;
+const MIN_DISTANCE = 20;
+const COLLISION_MARGIN = 10;
 const CUT_SIZE = { width: 350, height: 200 };
 const TEMP_DESCRIPTIONS = [
-    "멍하니 침대에 누워 있어요.", "눈물이 흐른다.", "쏴아아, 바다 소리가 귀를 관통한다.",
-    "점점 물에 잠긴다. \n 톡, 무언가 나를 건드린다", "물 속에서 눈을 뜬다.", "몸을 일으킨다. 바다다.",
-    "바다가 손을 내민다. 나도 손을 내민다.", "나를 안아준다. 바다에 안긴다.", "침대 위에 누워 있다. \n 축축해.",
+    "멍하니 침대에 누워 있어요.", "눈물이 흐른다.", "쏴아아,\n바다 소리가 귀를 관통한다.",
+    "점점 물에 잠긴다. \n 톡, 무언가 나를 건드린다", "물 속에서 눈을 뜬다.", "몸을 일으킨다. \n우와, 바다다.",
+    "바다가 손을 내민다. \n 나도 손을 내민다.", "나를 안아줘. \n 바다에 안긴다.", "침대 위에 누워 있어요. \n 축축해.",
     "몸을 웅크린다. \n 바다 소리가 나를 둘러싼다."
 ];
 
@@ -19,6 +19,7 @@ const storyPanel = document.getElementById('story-panel');
 const storyOutputDiv = document.getElementById('story-output');
 const restartButton = document.getElementById('restart-button');
 const instructionDiv = document.getElementById('instruction');
+const generateButton = document.getElementById('generate-button');
 
 const userImages = Array.from({ length: NUM_USER_CUTS }, (_, i) => `img/cut_${i + 1}.png`);
 
@@ -215,6 +216,23 @@ function generateStory() {
     callGeminiAPI(storyPrompt);
 }
 
+// Generate 버튼 클릭 처리: 선택 개수와 무관하게 스토리 생성
+if (generateButton) {
+    generateButton.addEventListener('click', () => {
+        // 선택된 설명을 사용하거나, 선택이 없으면 모든 설명을 기본으로 사용
+        if (selectedSequence.length === 0) {
+            // 기본: 모든 컷 설명을 순서대로 사용
+            selectedSequence = allCuts.map(cut => ({ id: cut.id, description: cut.description, imageNumber: parseInt(cut.id.split('-')[1]), x: cut.x, y: cut.y }));
+        }
+        generateStory();
+    });
+    // 터치 디바이스에서 터치로도 동작하도록 touchend 연결
+    generateButton.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        generateButton.click();
+    }, { passive: false });
+}
+
 function updateSelectionDisplay() {
     allCuts.forEach(cut => {
         const index = selectedSequence.findIndex(item => item.id === cut.id);
@@ -315,14 +333,21 @@ document.addEventListener('mouseleave', () => {
 // --- 모바일 터치 이벤트 핸들러 (수정) ---
 
 document.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 1) {
-        e.preventDefault();
-        isTouchStart = true;
-        touchMovedDistance = 0; // <mark>*** 수정: 이동 거리 초기화 ***</mark>
-        startPos.x = e.touches[0].clientX;
-        startPos.y = e.touches[0].clientY;
-        document.body.style.cursor = 'grabbing';
+    if (e.touches.length !== 1) return;
+
+    const target = e.target;
+    // allow touches on UI controls (buttons, panels) to pass through
+    if (target && target.closest && (target.closest('#controls') || target.closest('button') || target.closest('#story-panel'))) {
+        return;
     }
+
+    // otherwise treat as canvas drag start and prevent default scrolling
+    e.preventDefault();
+    isTouchStart = true;
+    touchMovedDistance = 0; // 이동 거리 초기화
+    startPos.x = e.touches[0].clientX;
+    startPos.y = e.touches[0].clientY;
+    document.body.style.cursor = 'grabbing';
 }, { passive: false });
 
 document.addEventListener('touchmove', (e) => {
