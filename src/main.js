@@ -1,10 +1,10 @@
 // --- 설정 변수 ---
 const CANVAS_WIDTH = 3000;
-const CANVAS_HEIGHT = 3000;
+const CANVAS_HEIGHT = 1500;
 const NUM_USER_CUTS = 10;
-const MIN_DISTANCE = 10;
-const COLLISION_MARGIN = 5;
-const CUT_SIZE = { width: 300, height: 200 };
+const MIN_DISTANCE = 15;
+const COLLISION_MARGIN = 7;
+const CUT_SIZE = { width: 350, height: 200 };
 const TEMP_DESCRIPTIONS = [
     "멍하니 침대에 누워 있어요.", "눈물이 흐른다.", "쏴아아, 바다 소리가 귀를 관통한다.",
     "점점 물에 잠긴다. \n 톡, 무언가 나를 건드린다", "물 속에서 눈을 뜬다.", "몸을 일으킨다. 바다다.",
@@ -273,7 +273,7 @@ document.addEventListener('mousemove', (e) => {
     let newCameraY = currentCameraPos.y - dy;
 
     // <mark>*** 수정: 중복 및 충돌 로직 삭제, 단일 경계 로직 유지 ***</mark>
-    const PADDING = 200;
+    const PADDING = 70;
 
     // 캔버스 중앙(centerX, centerY)이 뷰포트 중앙에 왔을 때를 기준으로 제한합니다.
     const maxCameraX = CANVAS_WIDTH - window.innerWidth / 2 + PADDING;
@@ -339,7 +339,7 @@ document.addEventListener('touchmove', (e) => {
     let newCameraY = currentCameraPos.y - dy;
 
     // <mark>*** 수정: 경계 로직 단순화 (mousemove와 동일) ***</mark>
-    const PADDING = 200;
+    const PADDING = 70;
     const maxCameraX = CANVAS_WIDTH - window.innerWidth / 2 + PADDING;
     const maxCameraY = CANVAS_HEIGHT - window.innerHeight / 2 + PADDING;
     const minCameraX = window.innerWidth / 2 - PADDING;
