@@ -124,6 +124,10 @@ function renderCuts() {
         descriptionEl.textContent = cut.description;
         el.appendChild(descriptionEl);
 
+        const sequenceNumberEl = document.createElement('div');
+        sequenceNumberEl.classList.add('sequence-number-overlay');
+        el.appendChild(sequenceNumberEl);
+
 
         // 클릭 이벤트 리스너 추가
         el.addEventListener('click', (e) => {
@@ -132,7 +136,7 @@ function renderCuts() {
             e.stopPropagation();
         });
         cut.element = el;
-
+        cut.sequenceElement = sequenceNumberEl; // 순서 번호 요소 저장
         canvas.appendChild(el);
     });
 }
@@ -170,6 +174,23 @@ function handleCutClick(cutData, el) {
     updateSelectionDisplay();
     drawLines();
 }
+
+
+function updateSelectionDisplay() {
+    allCuts.forEach(cut => {
+        const index = selectedSequence.findIndex(item => item.id === cut.id);
+
+        if (index > -1) {
+            // 선택된 컷: 순서 번호 표시
+            // cut.sequenceElement가 1번 수정 후 정상적으로 작동합니다.
+            cut.sequenceElement.textContent = index + 1;
+        } else {
+            // 미선택된 컷: 순서 번호 숨김
+            cut.sequenceElement.textContent = '';
+        }
+    });
+}
+
 
 // 연결선 그리기 (기존 로직 유지)
 function drawLines() {
