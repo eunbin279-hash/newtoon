@@ -1,3 +1,11 @@
+@font-face {
+    font-family: 'MissedSimsim';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2511-1@1.0/Griun_Simsimche-Rg.woff2') format('woff2');
+    font-weight: normal;
+    font-display: swap;
+}
+
+
 body,
 html {
     margin: 0;
@@ -7,6 +15,8 @@ html {
     width: 100%;
     background-color: white;
     color: white;
+    font-family: 'MissedSimsim';
+
 }
 
 #wrapper {
@@ -35,8 +45,8 @@ html {
 
 
     /* 컴퓨터 (기본) 크기 */
-    width: 400px;
-    height: 250px;
+    width: 300px;
+    height: 200px;
 }
 
 /* 선택 시 피드백: 불투명도 증가 및 빛나는 효과 */
@@ -46,11 +56,43 @@ html {
     filter: none;
 }
 
+.cut-description {
+    /* <mark>기본적으로 숨김 처리</mark> */
+    display: none;
+    position: absolute;
+    bottom: -50px;
+    /* 컷 컨테이너(이미지) 바로 아래에 위치 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    /* 설명 텍스트가 표시될 너비 */
+    text-align: center;
+    padding: 5px 8px;
+    border-radius: 5px;
+    color: rgb(17, 30, 54);
+    font-size: 0.8em;
+    pointer-events: none;
+    /* 클릭 이벤트 방해 방지 */
+    z-index: 10;
+    white-space: pre-wrap;
+}
+
+/* 컷이 선택되었을 때만 설명을 표시 */
+.cut-item.selected .cut-description {
+    display: block;
+}
+
+
+
+
+
+
+
 /* 모바일 최적화 (600px 이하) */
 @media (max-width: 600px) {
     .cut-item {
-        width: 250px;
-        height: 150px;
+        width: 200px;
+        height: 100px;
     }
 }
 
@@ -71,8 +113,10 @@ html {
     transform: translateX(-50%);
     z-index: 10;
     padding: 10px 20px;
-    background: rgba(0, 0, 0, 0.7);
     border-radius: 5px;
+    color: rgb(56, 143, 172);
+    white-space: nowrap;
+
 }
 
 /* 스토리 패널 설정 */
