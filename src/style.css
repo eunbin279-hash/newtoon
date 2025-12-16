@@ -107,8 +107,8 @@ html {
 /* 모바일 최적화 (600px 이하) */
 @media (max-width: 600px) {
     .cut-item {
-        width: 200px;
-        height: 100px;
+        width: 250px;
+        height: 150px;
     }
 }
 
@@ -142,7 +142,26 @@ html {
     }
 
     #controls {
-        bottom: 12px;
+        bottom: 30px;
+    }
+}
+
+/* Mobile adjustments for story panel readability */
+@media (max-width: 600px) {
+    #story-panel {
+        /* allow almost full width on small screens and reduce padding */
+        max-width: 90vw;
+        width: 77vw;
+        padding: 14px;
+        border-radius: 12px;
+        top: 52%;
+        transform: translate(-50%, -50%);
+    }
+
+    #story-output {
+        font-size: 1rem;
+        padding-left: 6px;
+        margin-bottom: 12px;
     }
 }
 
@@ -189,6 +208,7 @@ html {
     overflow-y: auto;
     z-index: 100;
     text-align: center;
+    box-shadow: rgb(56, 143, 172, 0.8) 0px 4px 12px;
 }
 
 #story-panel.hidden {
@@ -211,4 +231,52 @@ html {
     border-radius: 20px;
     cursor: pointer;
     font-size: 1em;
+}
+
+/* Intro overlay styles */
+#intro-overlay {
+    position: fixed;
+    inset: 0;
+    background: #0b1320;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+#intro-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#intro-content {
+    position: relative;
+    z-index: 10000;
+    color: white;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+#intro-title {
+    font-size: 2.2rem;
+    margin: 0 0 8px 0;
+}
+
+#intro-desc {
+    line-height: 1.4;
+    margin: 0 0 12px 0;
+    opacity: 0.9;
+}
+
+#intro-hint {
+    font-size: 0.9rem;
+    opacity: 0.85;
+}
+
+/* hide overlay when removed by adding .hidden */
+#intro-overlay.hidden {
+    display: none;
 }

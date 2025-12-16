@@ -478,4 +478,163 @@ if (restartButton) {
     });
 }
 
-window.onload = initializeCanvas;
+// Intro animation: sine-wave dots falling to center
+const introOverlay = document.getElementById('intro-overlay');
+const introCanvas = document.getElementById('intro-canvas');
+const introContent = document.getElementById('intro-content');
+
+function runIntroAnimation() {
+    if (!introCanvas) {
+        initializeCanvas();
+        return;
+    }
+    const ctx = introCanvas.getContext('2d');
+    function resize() {
+        introCanvas.width = window.innerWidth;
+        introCanvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // prepare dots: denser grid but capped for performance
+    const dots = [];
+    const spacing = 10; // tighter spacing => more dots for wave look
+    const cols = Math.min(Math.ceil(window.innerWidth / spacing), 480);
+    // wave timing window (ms)
+    const waveWindow = 800;
+    for (let i = 0; i < cols; i++) {
+        const x = (i + 0.5) * (window.innerWidth / cols);
+        // slower drop and return for calmer feel; start all together but add tiny landing offset
+        const dropSpeed = 8 + Math.random() * 4;
+        const returnSpeed = 1.6 + Math.random() * 1.2;
+        const landingOffset = Math.random() * 18 - 9; // small vertical jitter at landing
+        dots.push({ x, y: -Math.random() * 260 - 10, dropSpeed, returnSpeed, landingOffset, state: 'dropping', passed: false, returned: false });
+    }
+
+    // ensure intro content hidden initially
+    introContent.style.opacity = '0';
+    introOverlay.style.opacity = '1';
+    introOverlay.style.transition = 'opacity 450ms ease';
+
+    // configurable delay (ms) before showing the title after return starts
+    const TITLE_REVEAL_DELAY_MS = 900; // adjust this number to show title later/sooner
+    let animationActive = true;
+    let returnStarted = false;
+    let titleShown = false;
+    let titleRevealTimer = null;
+
+    const startTime = performance.now();
+
+    function draw() {
+        if (!animationActive) return;
+        ctx.clearRect(0, 0, introCanvas.width, introCanvas.height);
+        const centerY = introCanvas.height / 2;
+
+        let passedCount = 0;
+        let returnedCount = 0;
+
+        const now = performance.now();
+        for (const d of dots) {
+            // handle waiting -> dropping based on individual startDelay
+            if (d.state === 'waiting') {
+                if (now - startTime >= d.startDelay) d.state = 'dropping';
+            }
+
+            if (d.state === 'dropping') {
+                // smooth ease-out as we approach a target Y (slightly past center)
+                // landing point per-dot includes a small random offset so they don't align perfectly
+                const targetY = centerY + 24 + (introCanvas.height - centerY) * 0.08 + (d.landingOffset || 0);
+                const distance = targetY - d.y;
+                // if close, slow down using ease factor
+                if (distance < 120) {
+                    // ease-out interpolation
+                    const ease = Math.max(0.08, distance / 180);
+                    d.y += d.dropSpeed * ease;
+                } else {
+                    d.y += d.dropSpeed;
+                }
+                if (d.y > centerY) d.passed = true;
+                if (d.y > introCanvas.height + 40) d.passed = true;
+            } else if (d.state === 'returning') {
+                // smooth return using ease-in as it approaches the top
+                const topTarget = -40;
+                const distanceUp = d.y - topTarget;
+                if (distanceUp < 140) {
+                    const easeUp = Math.max(0.06, distanceUp / 220);
+                    d.y -= d.returnSpeed * easeUp;
+                } else {
+                    d.y -= d.returnSpeed;
+                }
+                if (d.y < -40) d.returned = true;
+            }
+
+            if (d.passed) passedCount++;
+            if (d.returned) returnedCount++;
+
+            // draw dot (no horizontal wobble) with tiny radius jitter
+            ctx.beginPath();
+            ctx.fillStyle = 'rgba(255,255,255,0.95)';
+            const r = 3.0 + (d.landingOffset ? Math.abs(d.landingOffset) / 12 : 0);
+            ctx.arc(d.x, d.y, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // when majority passed center, start return of dots and reveal title immediately
+        if (!returnStarted && passedCount > dots.length * 0.6) {
+            returnStarted = true;
+            // schedule title reveal after configured delay
+            titleRevealTimer = setTimeout(() => {
+                if (!titleShown) {
+                    titleShown = true;
+                    introContent.style.opacity = '1';
+                }
+            }, TITLE_REVEAL_DELAY_MS);
+            // small stagger helps visual flow
+            setTimeout(() => {
+                for (const d of dots) d.state = 'returning';
+            }, 80);
+        }
+
+        // when all dots have returned, finish intro (overlay fades after a short pause)
+        if (returnStarted && returnedCount === dots.length) {
+            // fade overlay after a short pause so title is visible
+            setTimeout(() => {
+                introOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    animationActive = false;
+                    introOverlay.classList.add('hidden');
+                    window.removeEventListener('resize', resize);
+                    initializeCanvas();
+                }, 420);
+            }, 220);
+            return;
+        }
+
+        requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    function endIntro() {
+        // if user taps, reveal title and send dots back immediately
+        if (!animationActive) return;
+        // cancel scheduled reveal and show immediately
+        if (titleRevealTimer) {
+            clearTimeout(titleRevealTimer);
+            titleRevealTimer = null;
+        }
+        if (!titleShown) {
+            titleShown = true;
+            introContent.style.opacity = '1';
+        }
+        for (const d of dots) d.state = 'returning';
+    }
+
+    introOverlay.addEventListener('click', endIntro, { once: true });
+    introOverlay.addEventListener('touchend', (e) => { e.preventDefault(); endIntro(); }, { once: true, passive: false });
+}
+
+// start intro on load
+window.addEventListener('load', () => {
+    runIntroAnimation();
+});
