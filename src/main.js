@@ -576,11 +576,19 @@ function runIntroAnimation() {
     draw();
 
     function endIntro() {
-        // if user taps, reveal title and send dots back immediately
+        // immediate skip: stop animation and initialize app now
         if (!animationActive) return;
+        animationActive = false;
+        // reveal title immediately
         titleShown = true;
         introContent.style.opacity = '1';
-        for (const d of dots) d.state = 'returning';
+        // hide overlay and start main canvas
+        introOverlay.style.opacity = '0';
+        setTimeout(() => {
+            introOverlay.classList.add('hidden');
+            window.removeEventListener('resize', resize);
+            initializeCanvas();
+        }, 120);
     }
 
     introOverlay.addEventListener('click', endIntro, { once: true });
