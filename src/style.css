@@ -71,6 +71,8 @@ html {
     opacity: 1;
     transform: scale(1.05);
     filter: none;
+    z-index: 1;
+
 }
 
 .cut-description {
@@ -90,7 +92,7 @@ html {
     font-size: 0.8em;
     pointer-events: none;
     /* 클릭 이벤트 방해 방지 */
-    z-index: 200;
+    z-index: 99999;
     /* above images and most UI */
     white-space: pre-wrap;
 }
