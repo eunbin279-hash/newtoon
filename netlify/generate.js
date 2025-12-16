@@ -1,6 +1,6 @@
 // <mark>이 파일은 서버에서 실행되므로 API 키를 안전하게 Environment Variable에서 불러올 수 있습니다.</mark>
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = 'gemini-1.5-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 
 // Netlify Functions의 기본 핸들러 함수
 exports.handler = async (event) => {
@@ -18,7 +18,7 @@ exports.handler = async (event) => {
 
     try {
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+            `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent`,
             {
                 method: 'POST',
                 headers: {
