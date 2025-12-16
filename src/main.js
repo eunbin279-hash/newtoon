@@ -209,7 +209,7 @@ function generateStory() {
     const imageNumbers = selectedSequence.map(item => item.imageNumber);
 
     // AI API에 전달할 프롬프트
-    const storyPrompt = `다음 설명들을 순서대로 연결하여 하나의 이어진 이야기를 창작해 주세요. 설명 순서: ${descriptions.join(' -> ')}`;
+    const storyPrompt = `다음 설명들을 순서대로 연결하여 하나의 이어진 이야기를 창작해 주세요. 설명 순서: ${descriptions.join(' -> ')} 제목은 적지 말고, *나 #같은 특수문자는 사용하지 마세요.`;
     storyOutputDiv.innerHTML = `이야기를 생성 중입니다... 잠시만 기다려 주세요.`;
     storyPanel.classList.remove('hidden');
 
